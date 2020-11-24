@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 	
+		"-//mybatis.org//DTD Mapper 3.0//EN" 
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.itbank.dao.PaymentDAO">
+	
+<!-- 	2020.08.03 재고 수량 체크-->
+	<select id="stockcheck" parameterType="hashmap" resultType="int">
+		select quantity from shoesize where merchan_code=#{code} and shoe_size=${size}
+	</select>
+	
+	<insert id="addCart" parameterType="CartVO">
+		insert into cart
+			(customer_code, merchan_code, amount, price, shoe_size)
+		values
+			(#{customerCode}, #{merchanCode}, #{amount}, #{price}, #{shoeSize})
+	</insert>
+
+
+	<select id="selectCartList" parameterType="HashMap" resultType="CartVO">
+		select * from cart
+			where customer_code = #{customerCode}
+	</select>
+	
+	<!-- 2020-08-07 추가 (조재일) -->
+	<delete id="deleteCart" parameterType="HashMap">
+		delete from cart
+			where customer_code=${customerCode} and merchan_code=#{merchanCode} and shoe_size=${shoeSize}
+	</delete>
+	
+	<!-- 	2020.08.07 김정미 -->
+	<!-- 	코드값에 따른 이름 가져오기 -->
+	<select id="getName" parameterType="String" resultType="String">
+		select merchan_name from merchandise where merchan_code=#{code}
+	</select>
+
+<!-- 	2020.08.13 -->
+<!-- 	이메일에 따른 고객코드 가져오기 -->
+	<select id="getcustomercode" parameterType="String" resultType="int">
+		select customer_code from customer2 where email=#{email}
+	</select>
+	
+<!-- 	2020.08.13 -->
+<!-- 	결제 시 상품 수량 업데이트 -->
+	<update id="payment" parameterType="com.itbank.vo.OrderListVO">
+		update shoesize set quantity=quantity-${orderQuantity} 
+			where merchan_code=#{merchanCode} and shoe_size=${shoeSize}
+	</update>
+	
+<!-- 	결제시 상품 주문 횟수 증가 -->
+	<update id="updateSalesRate" parameterType="com.itbank.vo.OrderListVO">
+		update merchandise set salesrate = salesrate + 1 where merchan_code=#{merchanCode} 
+	</update>
+	
+<!-- 	2020.08.13 -->
+<!-- 	회원 상품 주문 -->
+<!-- 2020.08.19+ order_merchanname 추가 -->
+	<insert id="memberP" parameterType="com.itbank.vo.OrderListVO">
+		insert into orderlist
+			(customer_code, merchan_code, order_date, order_price, order_quantity, order_address,
+			 order_codename, order_notes, order_payoption, order_recievename, order_recievepnum, order_recieveemail, order_shoesize, order_merchanname)
+		values
+			(#{customerCode}, #{merchanCode}, #{orderDate}, #{orderPrice}, #{orderQuantity}, #{orderAddress},
+			 #{orderCodename}, #{orderNotes}, #{orderPayoption}, #{orderRecieveName}, #{orderRecievePnum}, #{orderRecieveEmail}, ${shoeSize}, #{orderMerchanName})
+	</insert>
+	
+<!-- 	2020.08.13 -->
+<!-- 	비회원 상품 주문 -->
+<!-- 2020.08.19 -->
+<!-- order_shoesize, order_recievemail 오타 수정 -->
+
+<!-- 2020.08.19+ order_merchanname 추가 -->
+	<insert id="nonmemberP" parameterType="com.itbank.vo.OrderListVO">
+		insert into notmemberlist
+			(order_recievename, order_recievepnum, merchan_code, order_date, order_price, order_quantity, order_address, 
+			 order_codename, order_notes, order_payoption, order_recievemail, order_shoesize, order_merchanname)
+		values
+			(#{orderRecieveName}, #{orderRecievePnum}, #{merchanCode}, #{orderDate}, #{orderPrice}, #{orderQuantity}, #{orderAddress},
+			 #{orderCodename}, #{orderNotes}, #{orderPayoption}, #{orderRecieveEmail}, #{shoeSize}, #{orderMerchanName})
+	</insert>
+	
+<!-- 	2020.08.19+ 회원주문조회 customer.xml로 이동 -->
+<!-- 	비회원주문조회 -->
+	<select id="notmemberorderlist" parameterType="hashmap" resultType="com.itbank.vo.OrderListVO">
+		select * from notmemberlist where name=#{recieveName} and phone=#{recievePnum}
+	</select>
+	
+<!-- 	2020.08.19+ 
+		총주문금액, 포인트 적립 -->
+	<update id="updatePoint" parameterType="com.itbank.vo.CustomerVO">
+		update customer2 
+			set totalamount=totalamount+${totalAmount}, point=point+${point} 
+			where customer_code=#{customerCode}
+	</update>
+	
+	<delete id="deleteMemberCart" parameterType="int">
+		delete from cart
+			where customer_code=#{customerCode}
+	</delete>
+	
+</mapper>

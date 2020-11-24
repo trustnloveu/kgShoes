@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC 
+		"-//mybatis.org//DTD Config 3.0//EN" 
+		"http://mybatis.org/dtd/mybatis-3-config.dtd">
+		
+<configuration>
+	<settings>
+		<setting name="cacheEnabled" value="false" />
+		<setting name="useGeneratedKeys" value="false" />
+		<setting name="mapUnderscoreToCamelCase" value="true"/>
+	</settings>
+	
+	<typeAliases>
+		<typeAlias type="com.itbank.vo.MerchandiseVO" alias="MerchandiseVO" />
+		<typeAlias type="com.itbank.vo.ShoeSizeVO" alias="ShoeSizeVO" />
+		<typeAlias type="com.itbank.dao.MerchandiseDAO" alias="MerchandiseDAO" />
+		<typeAlias type="com.itbank.dao.ShoesDAO" alias="ShoesDAO" />
+		<typeAlias type="com.itbank.vo.CartVO" alias="CartVO"/>
+		<typeAlias type="com.itbank.vo.BoardVO" alias="BoardVO"/>
+		<typeAlias type="com.itbank.vo.ReviewsVO" alias="ReviewsVO"/>
+		<typeAlias type="com.itbank.vo.ReviewsReplyVO" alias="ReviewsReplyVO"/>
+		<typeAlias type="com.itbank.vo.BoardReplyVO" alias="BoardReplyVO"/>
+	</typeAliases>
+	
+</configuration>		

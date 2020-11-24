@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 	
+		"-//mybatis.org//DTD Mapper 3.0//EN" 
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itbank.dao.adminDAO">
+
+
+<!-- <select id="pkList" resultType="com.itbank.vo.onecodeVO">
+	select merchan_code from merchandise
+</select> -->
+
+<select id="AllList" resultType="com.itbank.vo.ItemChangeVO">
+	select * from itemschange
+</select>
+
+<!-- 기본키 검사용 SQL -->
+<select id="merchanAllList" resultType="string">
+	select merchan_code from merchandise
+</select>
+
+<!-- 상품등록에서 브랜드 가져오기 -->
+<select id="brandList" resultType="com.itbank.vo.BrandVO">
+	select * from brand
+</select>
+
+<select id="MerchanSearch" resultType="com.itbank.vo.ItemChangeVO" parameterType="map">
+	select * from itemschange where ${searchtype } like '%${searchWord }%'
+</select>
+
+<select id="MerchanSearchNum" resultType="com.itbank.vo.ItemChangeVO" parameterType="map">
+	select * from itemschange where ${searchtype } = #{searchWord }
+</select>
+
+<select id="salesManageChart" resultType="int" parameterType="map">
+	<![CDATA[
+	select sum(order_price) from orderlist where order_date >= to_date(#{beforeTime }) and order_date <= to_date(#{afterTime})
+	]]>
+</select>
+
+<select id="orderList" resultType="com.itbank.vo.OrderListVO">
+	select * from orderlist
+</select>
+
+<select id="SalesMerchanRank" resultType="com.itbank.vo.MerchanRankVO">
+	select distinct merchan_code, SUM(order_price) as order_price from orderlist group by merchan_code order by order_price desc
+</select>
+
+<select id="SalesCustomerRank" resultType="com.itbank.vo.CustomerRankVO">
+	select distinct customer_code, SUM(order_price) as order_price from orderlist group by customer_code order by order_price desc
+</select>
+
+<select id="todaySale" resultType="int" parameterType="String">
+	<![CDATA[
+	select sum(order_price) from orderlist where order_date >= to_date(#{thisTime })
+	]]>
+</select>
+
+<select id="thisMonthSale" resultType="int" parameterType="String">
+	<![CDATA[
+	select sum(order_price) from orderlist where order_date >= to_date(#{firstDayMonth })
+	]]>
+</select>
+
+<insert id="admininsert"  parameterType="com.itbank.vo.putintoVO">
+	insert into merchandise (merchan_code, merchan_name, price, category, img_src, brand, detail_src) 
+		values (#{merchanCode}, #{merchanName}, #{price}, #{category}, #{imgSrc}, #{brand}, #{detailSrc})
+</insert>
+
+<insert id="joinShoeSize" parameterType="map">
+	insert all 
+		into shoesize (merchan_code, shoe_size, quantity) values (#{merchanCode}, 250, ${quantity250 }) 
+		into shoesize (merchan_code, shoe_size, quantity) values (#{merchanCode}, 260, ${quantity260 })
+		into shoesize (merchan_code, shoe_size, quantity) values (#{merchanCode}, 270, ${quantity270 })
+		into shoesize (merchan_code, shoe_size, quantity) values (#{merchanCode}, 280, ${quantity280 })
+		into shoesize (merchan_code, shoe_size, quantity) values (#{merchanCode}, 290, ${quantity290 })
+		into shoesize (merchan_code, shoe_size, quantity) values (#{merchanCode}, 300, ${quantity300 })
+	select * from DUAL	
+	
+</insert>
+
+
+
+
+<insert id="joinBrand" parameterType="map">
+	insert into brand (uri, name) values (#{uri }, #{name } )
+</insert>
+
+<update id="ItemChange" parameterType="com.itbank.vo.ItemChangeVO">
+	update itemschange set 
+	
+	<if test="amount gte 0">
+		amount = ${amount }
+	</if>
+	<if test="amount gte 0 and discrate gte 0">
+		,
+	</if>
+	<if test="amount gte 0 and price gte 0 and discrate lt 0">
+		,
+	</if>
+	<if test="discrate gte 0">
+		discrate = ${discrate }
+	</if>
+	<if test="discrate gte 0 and price gte 0">
+		,
+	</if>
+	<if test="price gte 0">
+		price = ${price }
+	</if>
+	 where merchan_code = #{merchanCode }
+</update>
+
+<update id="merchanChange" parameterType="com.itbank.vo.ItemChangeVO">
+	update merchandise set
+		<if test="discrate gte 0">
+			discrate = ${discrate }
+		</if>
+		<if test="discrate gte 0 and price gte 0">
+			,
+		</if>
+		<if test="price gte 0">
+			price = ${price }
+		</if>
+	 where merchan_code = #{merchanCode }
+</update>
+
+<update id="shoesSizeChange" parameterType="com.itbank.vo.ItemChangeVO">
+	update shoesize set quantity = quantity + ${amount } where merchan_code = #{merchanCode }
+</update>
+
+
+</mapper>
+		

@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 	
+		"-//mybatis.org//DTD Mapper 3.0//EN" 
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.itbank.dao.BoardDAO">
+
+<!-- 2020년 8월 18일 수정 -->
+<select id="selectAll" resultType="BoardVO" parameterType="com.itbank.vo.BoardParam">
+	select * from
+		(select rownum as st, A.* from
+			(select * from notice
+				<if test="wordType != null and !word.equals('')">
+					where ${wordType} like '%' || #{word} || '%'
+				</if>
+				<if test="sort != null and sort.equals('new')">order by registDate desc</if>
+				<if test="sort != null and sort.equals('put')">order by registDate</if>
+				<if test="sort != null and sort.equals('view')">order by review desc</if>
+			)
+		A where rownum <![CDATA[ <= ]]> #{end}) 
+	where st <![CDATA[ >= ]]> #{start}
+</select>
+
+<insert id="writeInsert" parameterType="hashmap">
+	insert into notice
+		(type, title, writer, context<if test="img != null">, img</if>)
+	values
+		(#{type}, #{title}, #{writer}, #{context}<if test="img != null">, #{img}</if>)
+</insert>
+
+<!-- 2020년 8월 18일 수정 -->
+<select id="getCount" resultType="int" parameterType="com.itbank.vo.BoardParam">
+	select count(*) from notice
+	<if test="wordType != null and !word.equals('')">
+		where (${wordType} like '%' || #{word} || '%')
+	</if>
+</select>
+
+<select id="selectOne" parameterType="BoardVO" resultType="BoardVO">
+	select * from notice where noticeNum = #{noticeNum}
+</select>
+
+<!-- 2020년 08월 18일 수정 -->
+<update id="writeUpdate" parameterType="BoardVO">
+	update notice
+	set
+		title=#{title}, context=#{context}, registDate=#{registDate},
+		<if test="img == null"> img=null</if>
+		<if test="img != null"> img=#{img}</if>
+	where
+		noticeNum=#{noticeNum}
+</update>
+
+<delete id="deleteBoard" parameterType="int">
+	delete notice where noticeNum=#{noticeNum}
+</delete>
+
+<insert id="reviewInsert" parameterType="ReviewsVO">
+	insert into review
+		(writer, context, merchan_Code, customer_Code<if test="img != null">, img</if>)
+	values
+		(#{writer}, #{context}, #{merchanCode}, #{customerCode}<if test="img != null">, #{img}</if>)
+</insert>
+
+<select id="selectReviewAll" parameterType="com.itbank.vo.ReviewsParam" resultType="ReviewsVO">
+	select * from
+		(select rownum as st, A.* from
+			(select * from review where merchan_Code=#{merchanCode})
+		A where rownum <![CDATA[ <= ]]> #{end})
+	where st <![CDATA[ >= ]]> #{start}
+</select>
+
+<select id="getCount2" parameterType="com.itbank.vo.ReviewsParam" resultType="int">
+	select count(*) from review
+	where merchan_Code=#{merchanCode}
+</select>
+
+<select id="selectAllReply" resultType="ReviewsReplyVO">
+	select * from reviewsreply
+</select>
+
+<select id="getMax" resultType="int">
+	select max(reorder) from reviewsreply
+</select>
+
+<select id="getBoardReplyMax" resultType="int">
+	select max(reorder) from boardreply
+</select>
+
+<insert id="insertReply" parameterType="ReviewsReplyVO">
+	insert into reviewsreply
+		(writer, context, reparent, redepth, reorder, merchan_Code, rnum, customer_Code)
+	values
+		(#{writer}, #{context}, #{reparent}, #{redepth}, #{reorder}, #{merchanCode}, #{rnum}, #{customerCode})
+</insert>
+
+<select id="selectReply" parameterType="com.itbank.vo.ReplyParam" resultType="ReviewsReplyVO">	
+	select * from
+		(select rownum as st, A.* from
+			(select * from reviewsreply where rnum = #{rnum} order by reorder)
+		A where rownum <![CDATA[ <= ]]> #{end})
+	where st <![CDATA[ >= ]]> #{start}
+</select>
+
+<select id="selectRnum" parameterType="String" resultType="int">
+	select rnum from review where merchan_Code=#{merchanCode}
+</select>
+
+<select id="selectReplyRenum" parameterType="int" resultType="ReviewsReplyVO">
+	select * from reviewsreply where renum=#{renum}
+</select>
+
+<update id="updateReply" parameterType="int">
+	update reviewsreply 
+	set
+		reorder=reorder + 1
+	where
+		reorder <![CDATA[ > ]]> #{reorder2}
+</update>
+
+<update id="updateRecomment" parameterType="ReviewsReplyVO">
+	update reviewsreply
+	set 
+		writer=#{writer}, context=#{context}, registDate=#{registDate}
+	where
+		renum=#{renum}
+</update>
+
+<update id="downReorder" parameterType="int">
+	update reviewsreply
+	set
+		reorder=reorder - 1
+	where
+		reorder <![CDATA[ > ]]> #{reorder}
+</update>
+
+<select id="selectReplyChild" parameterType="int" resultType="ReviewsReplyVO">
+	select * from reviewsreply where reparent = #{reorder}
+</select>
+
+<delete id="deleteReply" parameterType="int">
+	delete from reviewsreply where renum = #{renum}
+</delete>
+
+<update id="updateReviews" parameterType="ReviewsVO">
+	update review
+	set
+		writer=#{writer}, context=#{context}, registDate=#{registDate}, img=#{img}
+	where
+		rnum = #{rnum}
+</update>
+
+<delete id="deleteReviewsReply" parameterType="int">
+	delete reviewsreply where rnum=#{rnum}
+</delete>
+
+<delete id="deleteReviews" parameterType="int">
+	delete review where rnum=#{rnum}
+</delete>
+
+<select id="selectReviewOne" parameterType="int" resultType="ReviewsVO">
+	select * from review where rnum=#{rnum}
+</select>
+
+<select id="getCountReply" parameterType="int" resultType="int">
+	select count(*) from reviewsreply where rnum=#{rnum}
+</select>
+
+<select id="getCountBoardReply" parameterType="int" resultType="int">
+	select count(*) from boardreply where noticeNum=#{noticeNum}
+</select>
+
+<select id="selectBoardReply" parameterType="com.itbank.vo.ReplyParam" resultType="BoardReplyVO">
+	select * from
+		(select rownum as st, A.* from
+			(select * from boardreply where noticeNum = #{noticeNum} order by reorder)
+		A where rownum <![CDATA[ <= ]]> #{end})
+	where st <![CDATA[ >= ]]> #{start}
+</select>
+
+<select id="selectAllBoardReply" resultType="BoardReplyVO">
+	select * from boardreply
+</select>
+
+<insert id="insertBoardReply" parameterType="BoardReplyVO">
+	insert into boardreply
+		(writer, context, reparent, redepth, reorder, noticeNum, customer_Code)
+	values
+		(#{writer}, #{context}, #{reparent}, #{redepth}, #{reorder}, #{noticeNum}, #{customerCode})
+</insert>
+
+<select id="selectBoardReplyRenum" parameterType="BoardReplyVO" resultType="BoardReplyVO">
+	select * from boardreply where renum=#{renum}
+</select>
+
+<update id="updateBoardReply" parameterType="int">
+	update boardreply
+	set
+		reorder=reorder + 1
+	where
+		reorder <![CDATA[ > ]]> #{reorder2}
+</update>
+
+<update id="downBoardReplyReorder" parameterType="int">
+	update boardreply
+	set
+		reorder=reorder - 1
+	where
+		reorder <![CDATA[ > ]]> #{reorder}
+</update>
+
+<select id="selectBoardReplyChild" parameterType="int" resultType="BoardReplyVO">
+	select * from boardreply where reparent = #{reorder}
+</select>
+
+<delete id="deleteBoardReply" parameterType="int">
+	delete from boardreply where renum = #{renum}
+</delete>
+
+<update id="updateBoardReviewCount" parameterType="int">
+	update notice
+	set
+		review = review + 1
+	where
+		noticeNum = #{noticeNum}
+</update>
+
+<update id="updateBoardRePlyCount" parameterType="int">
+	update notice
+	set
+		reply = reply + 1
+	where
+		noticeNum = #{noticeNum}
+</update>
+
+<update id="updateBoardReplyCountDown" parameterType="int">	
+	update notice
+	set
+		reply = reply - 1
+	where
+		noticeNum = #{noticeNum}
+</update>
+
+<update id="updateBoardReply2" parameterType="BoardReplyVO">
+	update boardreply
+	set
+		writer = #{writer}, context = #{context}, registDate = #{registDate}
+	where
+		renum = #{renum}
+</update>
+
+</mapper>

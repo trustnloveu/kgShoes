@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 	
+		"-//mybatis.org//DTD Mapper 3.0//EN" 
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.itbank.dao.ClientDAO">
+	
+	<select id="recommendedHomeList" resultType="MerchandiseVO">
+		
+		select merchan_code, merchan_name, img_src, price, brand, category, 
+			detail_src, registDate, discrate, salesrate,  rank() over (order by salesrate desc) as rank from merchandise 
+			 
+		
+	</select>	
+	
+	
+	
+</mapper>
+
+

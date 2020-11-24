@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 	
+		"-//mybatis.org//DTD Mapper 3.0//EN" 
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.itbank.dao.MerchandiseDAO">
+	
+	<select id="selectMerchandiseAll" resultType="MerchandiseVO" parameterType="com.itbank.vo.FsParam">
+		select * from 
+			(select rownum as st, A.* from 
+				(select * from merchandise
+				
+				<if test="brand == null and category == null and firstPrice == 0 and lastPrice == 0 and sort != null">
+					<choose>
+						<when test="sort.equals('merchanName')">order by merchan_Name</when>
+						<when test="sort.equals('priceAsc')">order by price</when>
+						<when test="sort.equals('priceDesc')">order by price desc</when>
+						<when test="sort.equals('registDate')">order by registDate desc</when>
+					</choose>
+				</if>
+				
+				<if test="brand != null">
+					where brand=#{brand}
+					<if test='sort != null and sort.equals("merchanName")'>order by merchan_Name</if>
+					<if test='sort != null and sort.equals("priceAsc")'>order by price</if>
+					<if test='sort != null and sort.equals("priceDesc")'>order by price desc</if>
+					<if test='sort != null and sort.equals("registDate")'>order by registDate desc</if>
+				
+				</if>
+				<if test="category != null">
+					where category=#{category}
+					<if test='sort != null and sort.equals("merchanName")'>order by merchan_Name</if>
+					<if test='sort != null and sort.equals("priceAsc")'>order by price</if>
+					<if test='sort != null and sort.equals("priceDesc")'>order by price desc</if>
+					<if test='sort != null and sort.equals("registDate")'>order by registDate desc</if>
+				</if>
+				<if test="firstPrice != 0 and lastPrice != 0 and firstPrice != lastPrice">
+					where price <![CDATA[ >= ]]> #{firstPrice} and price <![CDATA[ < ]]> #{lastPrice} 
+					<if test='sort != null and sort.equals("merchanName")'>order by merchan_Name</if>
+					<if test='sort != null and sort.equals("priceAsc")'>order by price</if>
+					<if test='sort != null and sort.equals("priceDesc")'>order by price desc</if>
+					<if test='sort != null and sort.equals("registDate")'>order by registDate desc</if>
+				</if>
+				<if test="firstPrice != 0 and firstPrice == lastPrice">
+					where price <![CDATA[ >= ]]> #{lastPrice}
+					<if test='sort != null and sort.equals("merchanName")'>order by merchan_Name</if>
+					<if test='sort != null and sort.equals("priceAsc")'>order by price</if>
+					<if test='sort != null and sort.equals("priceDesc")'>order by price desc</if>
+					<if test='sort != null and sort.equals("registDate")'>order by registDate desc</if>
+				</if>
+				) 
+			A where rownum <![CDATA[ <= ]]> #{end}) 
+		where st <![CDATA[ >= ]]> #{start}
+	</select>	
+	
+	<insert id="registMerchandise" parameterType="hashmap">
+		insert into merchandise 
+			(merchan_name, price, brand, category, quantity, imgSrc)
+		values
+			(#{merchanName}, #{price}, #{brand}, #{category}, #{quantity}, #{imgSrc})
+	</insert>
+	
+	<select id="getCount" resultType="int" parameterType="com.itbank.vo.FsParam">
+		select count(*) from merchandise
+		<if test="brand != null">
+			where brand=#{brand}
+		</if>
+		<if test="category != null">
+			where category=#{category}
+		</if>
+		<if test="firstPrice != 0 and lastPrice != 0 and firstPrice != lastPrice">
+			where price <![CDATA[ >= ]]> #{firstPrice} and price <![CDATA[ < ]]> #{lastPrice}
+		</if>
+		<if test="firstPrice != 0 and firstPrice == lastPrice">
+				where price <![CDATA[ >= ]]> #{lastPrice}
+		</if>
+	</select>
+	
+	<update id="updateGood" parameterType="hashmap">
+		update merchandise 
+		set
+			good = good + 1
+		where
+			merchan_Name = #{merchanName}
+	</update>
+
+	
+
+	<!-- 8.4BOng -->
+	<select id="getQuantityByCategory" resultType="int" parameterType="string">
+		select count(*) from merchandise where category = #{category} 
+	</select>
+	
+	<select id="getQuantityAll" resultType="int">
+		select count(*) from merchandise 
+	</select>
+	
+	<!-- 8.7Bong -->
+	<select id="selectBrand" resultType="string">
+		select brand from merchandise group by brand
+	</select>
+	
+	<select id="selectAtoC" resultType="string">
+		select brand from merchandise where brand like 'a' || '%' or brand like 'A' || '%'  or 
+				brand like 'b' || '%' or brand like 'B' || '%' or brand like 'c' || '%' or brand like 'C' || '%' group by brand 
+	</select>
+	
+	<select id="selectDtoF" resultType="string">
+		select brand from merchandise where brand like 'd' || '%' or brand like 'D' || '%'  or 
+				brand like 'e' || '%' or brand like 'E' || '%' or brand like 'f' || '%' or brand like 'F' || '%' group by brand 
+	</select>
+	
+	<select id="selectGtoI" resultType="string">
+		select brand from merchandise where brand like 'g' || '%' or brand like 'G' || '%'  or 
+				brand like 'h' || '%' or brand like 'H' || '%' or brand like 'i' || '%' or brand like 'I' || '%' group by brand 
+	</select>
+	
+	<select id="selectJtoL" resultType="string">
+		select brand from merchandise where brand like 'j' || '%' or brand like 'J' || '%'  or 
+				brand like 'k' || '%' or brand like 'K' || '%' or brand like 'l' || '%' or brand like 'L' || '%' group by brand 
+	</select>
+	
+	<select id="selectMtoO" resultType="string">
+		select brand from merchandise where brand like 'm' || '%' or brand like 'M' || '%'  or 
+				brand like 'n' || '%' or brand like 'N' || '%' or brand like 'o' || '%' or brand like 'O' || '%' group by brand 
+	</select>
+	
+	
+	<select id="selectPtoR" resultType="string">
+		select brand from merchandise where brand like 'p' || '%' or brand like 'P' || '%'  or 
+				brand like 'q' || '%' or brand like 'Q' || '%' or brand like 'r' || '%' or brand like 'R' || '%' group by brand 
+	</select>
+	
+	<select id="selectStoU" resultType="string">
+		select brand from merchandise where brand like 's' || '%' or brand like 'S' || '%'  or 
+				brand like 't' || '%' or brand like 'T' || '%' or brand like 'u' || '%' or brand like 'U' || '%' group by brand 
+	</select>
+	
+	<select id="selectVtoZ" resultType="string">
+		select brand from merchandise where brand like 'v' || '%' or brand like 'V' || '%'  or 
+				brand like 'w' || '%' or brand like 'W' || '%' or brand like 'x' || '%' or brand like 'X' || '%' or 
+				brand like 'y' || '%' or brand like 'Y' || '%' or brand like 'z' || '%' or brand like 'Z' || '%' group by brand 
+	</select>
+	
+	<!-- 8.13 Bong  -->
+	<select id="recommendedBrand" resultType="com.itbank.vo.BrandVO">
+		select * from brand
+	</select>
+	
+	
+	
+</mapper>
+
+
